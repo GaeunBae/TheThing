@@ -131,16 +131,14 @@ var currentSourceSinkFlowObject = null;
  * @note `scriptsCode` is injected by puppeteer
  */ 
 var stage = new Iroh.Stage(localStorage.getItem('scriptsCode'));
-////////////////////////gaeun localstorage exceed error////////////////////////
 
-// const compressedCode = localStorage.getItem('scriptsCode');
-// const decompressedCode = LZString.decompressFromUTF16(compressedCode);
-
-// // Initialize Iroh.Stage
-// const stage = new Iroh.Stage(decompressedCode);
-// console.log(stage); // Or proceed with your use case
-//////////////////////////////////////////////////////////////////////////////
 var domcPayloads = localStorage.getItem('domcPayloads');
+////////////////////////***gaeun*** 이걸 해줘야 제대로 object 가져옴////////////////////////
+domcPayloads = JSON.parse(domcPayloads);
+DEBUG && console.log("domcPayloads got from localStorage"+domcPayloads[0].code); 
+DEBUG && console.log("full domcPayloads got from localStorage"+domcPayloads); 
+/////////////////////////////////////////////////////
+
 
 
 /**
@@ -1104,7 +1102,7 @@ function shouldForceExecute(e){
   currentBranchPath.push([e.hash, forcedVal]);
   //////////////gaeun//////////////
 
-  console.log("[shouldForceExecute]"+[e.hash, forcedVal]);
+  DEBUG &&console.log("[shouldForceExecute]"+[e.hash, forcedVal]);
   /////////////////////////////////
   let h = e.hash+'-' + forcedVal;
   currentBranchPathHashString = currentBranchPathHashString + h;
@@ -1118,14 +1116,15 @@ function shouldForceExecute(e){
  */ 
 function checkTaint(testString, e){
   /////////////gaeun/////////////
-  console.log('domcPayloads: '+domcPayloads);
+  DEBUG &&console.log('domcPayloads: '+domcPayloads[0]["code"]);
+  DEBUG &&console.log('testString: ' +testString);
   //////////////////////////////
   
   if(domcPayloads){
     for(let p of domcPayloads){
       if(testString.includes(p.taint_value)){
         /////////////gaeun/////////////
-        console.log('Tainted!!!: '+p.code+p.taint_value);
+        DEBUG &&console.log('[checkTaint] Tainted!!!: '+p.code+p.taint_value);
         //////////////////////////////
   
         let clobberable_item = {
@@ -1138,9 +1137,11 @@ function checkTaint(testString, e){
           'source_string': testString,
         }
         /////////////gaeun/////////////
-    console.log('clobberable_item: '+clobberable_item);
-    //////////////////////////////
+        DEBUG &&console.log('clobberable_item: '+clobberable_item["sink"]);
+        DEBUG &&console.log('clobberable_item: '+clobberable_item["source"]);
+        //////////////////////////////
         theWindow.clobberable.push(clobberable_item);
+        DEBUG &&console.log('clobberable_item: '+theWindow.clobberable[0]["source"]);
         return true;
       }
     }
@@ -1154,7 +1155,8 @@ function checkTaint(testString, e){
       'source_string': testString,
     }
     /////////////gaeun/////////////
-    console.log('clobberable_item : '+clobberable_item)
+    DEBUG &&console.log('clobberable_item sink: '+clobberable_item["sink"]);
+    DEBUG &&console.log('clobberable_item source: '+clobberable_item["source_string"]);
     //////////////////////////////
     theWindow.clobberable.push(clobberable_item)
     return true;
@@ -1217,11 +1219,16 @@ function checkForFlowToSink(e, node_type){
     //////////////////////////
     let objectElement = e.object;
     if(objectElement && objectElement.tagName && objectElement.tagName.toUpperCase() === 'SCRIPT' && e.property === 'src'){
+      ///////////gaeun//////////
+      DEBUG &&console.log("[checkForFlowToSink] detected script.src " );
+      DEBUG &&console.log("[checkForFlowToSink] "+e.value );
+      //////////////////////////
       let testString = '' + e.value;
       checkTaint(testString, e);
     }
     else if(e.property === 'innerHTML' && isDOMElement(objectElement)){
       let testString = '' + e.value;
+
       checkTaint(testString, e); 
     }
     else if(e.property === 'outerHTML' && isDOMElement(objectElement)){
@@ -1313,6 +1320,7 @@ function checkForFlowToSink(e, node_type){
     DEBUG &&console.log("[checkForFlowToSink] e.object :" + e.object);
     DEBUG &&console.log("[checkForFlowToSink] e.callee :" + e.callee);
     DEBUG &&console.log("[checkForFlowToSink] e.arguments :" + e.arguments);
+    DEBUG &&console.log(domcPayloads[0].code);
     //////////////////////////
     if(e.name === 'eval'){
       ///////////gaeun//////////
@@ -1398,7 +1406,13 @@ function checkForFlowToSink(e, node_type){
       //////////////////////////
       if(e.arguments && e.arguments.length >= 2){
         let testString = '' + e.arguments[1];
+        ///////////gaeun//////////
+        DEBUG &&console.log("[checkForFlowToSink] testString: "+testString);
+        //////////////////////////
         let flag = checkTaint(testString, e);
+        ///////////gaeun//////////
+        DEBUG &&console.log("[checkForFlowToSink] checkTaint: "+flag);
+        //////////////////////////
         if(flag){
           e.call = noOperationFunction;
         }

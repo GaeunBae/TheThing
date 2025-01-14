@@ -320,6 +320,9 @@ async function verify_clobbered_data_flows_of_website(browser, webpage_url, webp
 		var occurences = domcSources[clobberingSource];
 		occurences.forEach(obj =>{
 			obj["code"] = clobberingSource;
+			/////////////gaeun/////////////
+			DEBUG &&console.log('[force_execution] domcPayloads["code"]: '+obj["code"]);
+			//////////////////////////////
 			domcPayloads.push(obj);
 		});
 	});
@@ -366,44 +369,52 @@ async function verify_clobbered_data_flows_of_website(browser, webpage_url, webp
 
 	DEBUG && console.log('[DynamicAnalysis] preparing input scripts.');
 	console.log(`scriptsCode size: ${Buffer.byteLength(scriptsCode, 'utf-8')} bytes`);
+	//////////***gaeun***//////////
 	if (Buffer.byteLength(scriptsCode, 'utf-8')<=5000000){
+	///////////////////////////////
+
 		await page.evaluate( (scriptsCode) => {
 			localStorage.setItem('scriptsCode', scriptsCode);
 		}, scriptsCode);
+
+	//////////***gaeun***///////////////////
 	}
 	else{
 		return;
 	}
+	/////////////////////////////////////////
 	
-	///////////////////gaeun localstorage exceed error//////////////////////////
-	// await page.addScriptTag({
-	// 	url: 'https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js',
-	// });
-	// const LZString = require('lz-string');
-
-	// const compressedCode = LZString.compressToUTF16(scriptsCode);
-	// await page.evaluate((compressedCode) => {
-	// 	localStorage.setItem('scriptsCode', compressedCode);
-	// }, compressedCode);
-	////////////////////////////////////////////////////////////////////////////
 
 
 
 	// 2
 	DEBUG && console.log('[DynamicAnalysis] preparing clobbering sources.');
 	await page.evaluate( (domcPayloads) => {
-		/////////gaeun주석?/////////////
+		/////////gaeun 주석처리 왜 되어있지?/////////////
 		// window.domcPayloads = domcPayloads;
-		///////////////////////////////
+		//////////////////////////////////////////////
+
+		/////////***gaeun*** 이걸 해줘야 domc_taint_engine.js에서 다시 getItem할 떄 제대로 object 가져옴////////////////////////////////
+		domcPayloads = JSON.stringify(domcPayloads);
+		//////////////////////////////////////////////
+
 		localStorage.setItem('domcPayloads', domcPayloads);
+
+		/////////////gaeun/////////////
+		console.log('[force_execution] domcPayloads setted: '+domcPayloads[0]["code"]);
+		console.log('[force_execution] fulldomcPayloads setted: '+domcPayloads[0]);
+		//////////////////////////////
 	}, domcPayloads);
 
 
 	// 4
+	/////////////gaeun/////////////
+	DEBUG && console.log('[force_execution] domcPayloads[0]["code"]: '+domcPayloads[0]["code"]);
+	//////////////////////////////
 	DEBUG && console.log('[DynamicAnalysis] injecting the DOMC taint engine.');
 	const dynamic_taint_engine_file_path = pathModule.join('' + __dirname, "/../dynamic/domc_taint_engine.js"); 
 	const dynamic_taint_engine_content = readFile(dynamic_taint_engine_file_path);
-	////////////gaeun: 이거 왜 주석처리 되어있지지????????//////////
+	////////////gaeun 주석: 이거 왜 주석처리 되어있지지????????//////////
 	await page.addScriptTag({path: require.resolve(dynamic_taint_engine_file_path)}); 
 	//////////////////////////////////////////////////////////////
 	var taintEngineInstrumentationSuccess = true;
@@ -452,9 +463,6 @@ async function verify_clobbered_data_flows_of_website(browser, webpage_url, webp
 			DEBUG && console.log('[DynamicAnalysis] testing payload: ' + idx + '/' + domcPayloads.length);
 			//////////////////gaeun///////////////
 			DEBUG && console.log('[DynamicAnalysis] testing payload: '+oo.payload);
-			// page.on('console', (msg) => {
-			// 	console.log(msg.text());
-			// });
 			//////////////////////////////////////
 			try{
 
@@ -506,7 +514,7 @@ async function verify_clobbered_data_flows_of_website(browser, webpage_url, webp
 		DEBUG && console.log('[DynamicAnalysis] started saving analysis results.');
 		const pageClobberable = await page.evaluate(()=> {
 			////////////////gaeun/////////////
-			console.log('clobberable : '+window.clobberable)
+			console.log('clobberable : '+window.clobberable[0]["source"])
 			//////////////////////////////////
 			return window.clobberable;
 		});
