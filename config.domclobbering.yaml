@@ -49,4 +49,4 @@ passes:
   crawling: true
   static: true
   static_neo4j: false
-  dynamic: false
+  dynamic: true

@@ -1,0 +1,11 @@
+Defaulting to user installation because normal site-packages is not writeable
+Requirement already satisfied: python-dotenv in /home/julieb/.local/lib/python3.11/site-packages (0.14.0)
+Collecting python-dotenv
+  Downloading python_dotenv-1.0.1-py3-none-any.whl.metadata (23 kB)
+Downloading python_dotenv-1.0.1-py3-none-any.whl (19 kB)
+Installing collected packages: python-dotenv
+  Attempting uninstall: python-dotenv
+    Found existing installation: python-dotenv 0.14.0
+    Uninstalling python-dotenv-0.14.0:
+      Successfully uninstalled python-dotenv-0.14.0
+Successfully installed python-dotenv-1.0.1
