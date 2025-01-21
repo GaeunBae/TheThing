@@ -41,7 +41,8 @@ const dataStorageDirectory = pathModule.join('' + __dirname, '../data');
 var maxVisitedUrls = 30;
 
 // when true, nodejs will log the current step for each webpage to the console 
-const DEBUG = true; 		
+const DEBUG = true; 
+const GAEUNDEBUG = true;		
 
 // when true, nodejs will log the browser console logs to the console as they arrive
 const BROWSER_LOG = true; 
@@ -321,7 +322,7 @@ async function verify_clobbered_data_flows_of_website(browser, webpage_url, webp
 		occurences.forEach(obj =>{
 			obj["code"] = clobberingSource;
 			/////////////gaeun/////////////
-			DEBUG &&console.log('[force_execution] domcPayloads["code"]: '+obj["code"]);
+			GAEUNDEBUG && console.log('[force_execution] domcPayloads["code"]: '+obj["code"]);
 			//////////////////////////////
 			domcPayloads.push(obj);
 		});
@@ -409,7 +410,7 @@ async function verify_clobbered_data_flows_of_website(browser, webpage_url, webp
 
 	// 4
 	/////////////gaeun/////////////
-	DEBUG && console.log('[force_execution] domcPayloads[0]["code"]: '+domcPayloads[0]["code"]);
+	// GAEUNDEBUG && console.log('[force_execution] domcPayloads[0]["code"]: '+domcPayloads[0]["code"]);
 	//////////////////////////////
 	DEBUG && console.log('[DynamicAnalysis] injecting the DOMC taint engine.');
 	const dynamic_taint_engine_file_path = pathModule.join('' + __dirname, "/../dynamic/domc_taint_engine.js"); 
@@ -422,11 +423,11 @@ async function verify_clobbered_data_flows_of_website(browser, webpage_url, webp
 		//////////////////gaeun//////////////////
 		// console.log(dynamic_taint_engine_content);
 		const lines = dynamic_taint_engine_content.split('\n');
-		console.log('line 4');
-		console.log(lines[3]);
+		GAEUNDEBUG && console.log('line 4');
+		GAEUNDEBUG && console.log(lines[3]);
 		const snippet =lines[3][184];
-		console.log('line 4 column 185');
-		console.log(snippet);
+		GAEUNDEBUG && console.log('line 4 column 185');
+		GAEUNDEBUG && console.log(snippet);
 		///add async to below line
 		////////////////////////////////////////
 		await page.evaluate( (dynamic_taint_engine_content) => {
@@ -462,7 +463,7 @@ async function verify_clobbered_data_flows_of_website(browser, webpage_url, webp
 		for(let [idx, oo] of domcPayloads.entries()){
 			DEBUG && console.log('[DynamicAnalysis] testing payload: ' + idx + '/' + domcPayloads.length);
 			//////////////////gaeun///////////////
-			DEBUG && console.log('[DynamicAnalysis] testing payload: '+oo.payload);
+			GAEUNDEBUG && console.log('[DynamicAnalysis] testing payload: '+oo.payload);
 			//////////////////////////////////////
 			try{
 
@@ -514,7 +515,7 @@ async function verify_clobbered_data_flows_of_website(browser, webpage_url, webp
 		DEBUG && console.log('[DynamicAnalysis] started saving analysis results.');
 		const pageClobberable = await page.evaluate(()=> {
 			////////////////gaeun/////////////
-			console.log('clobberable : '+window.clobberable[0]["source"])
+			GAEUNDEBUG && console.log('clobberable : '+window.clobberable[0]);
 			//////////////////////////////////
 			return window.clobberable;
 		});

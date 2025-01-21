@@ -15,6 +15,7 @@
  * flag that sets the visibility of console debug messages
  *  */ 
 const DEBUG = true;
+const GAEUNDEBUG =true;
 
 /**
  * flag to start the force execution sepeartely for a webpage in the browser for debugging purposes
@@ -1102,7 +1103,7 @@ function shouldForceExecute(e){
   currentBranchPath.push([e.hash, forcedVal]);
   //////////////gaeun//////////////
 
-  DEBUG &&console.log("[shouldForceExecute]"+[e.hash, forcedVal]);
+  GAEUNDEBUG && console.log("[shouldForceExecute]"+[e.hash, forcedVal]);
   /////////////////////////////////
   let h = e.hash+'-' + forcedVal;
   currentBranchPathHashString = currentBranchPathHashString + h;
@@ -1116,18 +1117,19 @@ function shouldForceExecute(e){
  */ 
 function checkTaint(testString, e){
   /////////////gaeun/////////////
-  DEBUG &&console.log('domcPayloads: '+domcPayloads[0]["code"]);
-  DEBUG &&console.log('testString: ' +testString);
+  GAEUNDEBUG && console.log('domcPayloads: '+domcPayloads[0]["code"]);
+  GAEUNDEBUG && console.log('testString: ' +testString);
   //////////////////////////////
   
   if(domcPayloads){
     for(let p of domcPayloads){
       if(testString.includes(p.taint_value)){
         /////////////gaeun/////////////
-        DEBUG &&console.log('[checkTaint] Tainted!!!: '+p.code+p.taint_value);
+        GAEUNDEBUG && console.log('[checkTaint] Tainted!!!: '+p.code+p.taint_value);
         //////////////////////////////
   
         let clobberable_item = {
+          // 'sink': e.getASTNode(),
           'sink': e.getASTNode(),
           'sink_location': e.getPosition(),
           'source': p.code,
@@ -1137,8 +1139,8 @@ function checkTaint(testString, e){
           'source_string': testString,
         }
         /////////////gaeun/////////////
-        DEBUG &&console.log('clobberable_item: '+clobberable_item["sink"]);
-        DEBUG &&console.log('clobberable_item: '+clobberable_item["source"]);
+        GAEUNDEBUG && console.log('clobberable_item: '+clobberable_item["sink"]);
+        GAEUNDEBUG && console.log('clobberable_item: '+clobberable_item["source"]);
         //////////////////////////////
         theWindow.clobberable.push(clobberable_item);
         DEBUG &&console.log('clobberable_item: '+theWindow.clobberable[0]["source"]);
@@ -1155,8 +1157,8 @@ function checkTaint(testString, e){
       'source_string': testString,
     }
     /////////////gaeun/////////////
-    DEBUG &&console.log('clobberable_item sink: '+clobberable_item["sink"]);
-    DEBUG &&console.log('clobberable_item source: '+clobberable_item["source_string"]);
+    GAEUNDEBUG && &console.log('clobberable_item sink: '+clobberable_item["sink"]);
+    GAEUNDEBUG && console.log('clobberable_item source: '+clobberable_item["source_string"]);
     //////////////////////////////
     theWindow.clobberable.push(clobberable_item)
     return true;
@@ -1174,7 +1176,7 @@ function checkTaint(testString, e){
  */ 
 function checkForFlowToSink(e, node_type){
   /////////////gaeun/////////////
-  DEBUG &&console.log('[checkForFlowToSink]: node_type = '+node_type);
+  GAEUNDEBUG && console.log('[checkForFlowToSink]: node_type = '+node_type);
   //////////////////////////////
   if(node_type === "AssignmentExpression"){
 
@@ -1213,15 +1215,15 @@ function checkForFlowToSink(e, node_type){
 
     */
     ///////////gaeun//////////
-    DEBUG &&console.log("[checkForFlowToSink] e.value :" + e.value);
-    DEBUG &&console.log("[checkForFlowToSink] e.object :" + e.object);
-    DEBUG &&console.log("[checkForFlowToSink] e.property :" + e.property);
+    GAEUNDEBUG && console.log("[checkForFlowToSink] e.value :" + e.value);
+    GAEUNDEBUG && console.log("[checkForFlowToSink] e.object :" + e.object);
+    GAEUNDEBUG && console.log("[checkForFlowToSink] e.property :" + e.property);
     //////////////////////////
     let objectElement = e.object;
     if(objectElement && objectElement.tagName && objectElement.tagName.toUpperCase() === 'SCRIPT' && e.property === 'src'){
       ///////////gaeun//////////
-      DEBUG &&console.log("[checkForFlowToSink] detected script.src " );
-      DEBUG &&console.log("[checkForFlowToSink] "+e.value );
+      GAEUNDEBUG && console.log("[checkForFlowToSink] detected script.src " );
+      GAEUNDEBUG && console.log("[checkForFlowToSink] "+e.value );
       //////////////////////////
       let testString = '' + e.value;
       checkTaint(testString, e);
@@ -1316,15 +1318,15 @@ function checkForFlowToSink(e, node_type){
 
     */
     ///////////gaeun//////////
-    DEBUG &&console.log("[checkForFlowToSink] e.name :" + e.name);
-    DEBUG &&console.log("[checkForFlowToSink] e.object :" + e.object);
-    DEBUG &&console.log("[checkForFlowToSink] e.callee :" + e.callee);
-    DEBUG &&console.log("[checkForFlowToSink] e.arguments :" + e.arguments);
-    DEBUG &&console.log(domcPayloads[0].code);
+    GAEUNDEBUG && console.log("[checkForFlowToSink] e.name :" + e.name);
+    GAEUNDEBUG && console.log("[checkForFlowToSink] e.object :" + e.object);
+    GAEUNDEBUG && console.log("[checkForFlowToSink] e.callee :" + e.callee);
+    GAEUNDEBUG && console.log("[checkForFlowToSink] e.arguments :" + e.arguments);
+    GAEUNDEBUG && console.log(domcPayloads[0].code);
     //////////////////////////
     if(e.name === 'eval'){
       ///////////gaeun//////////
-      DEBUG &&console.log("[checkForFlowToSink] 1");
+      GAEUNDEBUG && console.log("[checkForFlowToSink] 1");
       //////////////////////////
       if(e.arguments && e.arguments.length){
         let testString = '' + e.arguments[0];
@@ -1337,7 +1339,7 @@ function checkForFlowToSink(e, node_type){
 
     else if(e.name === 'setTimeout'){
       ///////////gaeun//////////
-      DEBUG &&console.log("[checkForFlowToSink] 2");
+      GAEUNDEBUG && console.log("[checkForFlowToSink] 2");
       //////////////////////////
       if(e.arguments && e.arguments.length){
         let testString = '' + e.arguments[0];
@@ -1350,7 +1352,7 @@ function checkForFlowToSink(e, node_type){
 
     else if(e.name === 'setInterval'){
       ///////////gaeun//////////
-      DEBUG &&console.log("[checkForFlowToSink] 3");
+      GAEUNDEBUG && console.log("[checkForFlowToSink] 3");
       //////////////////////////
       if(e.arguments && e.arguments.length){
         let testString = '' + e.arguments[0];
@@ -1363,7 +1365,7 @@ function checkForFlowToSink(e, node_type){
 
     else if(e.object === theDocument && e.callee == "write"){
       ///////////gaeun//////////
-      DEBUG &&console.log("[checkForFlowToSink] 4");
+      GAEUNDEBUG && console.log("[checkForFlowToSink] 4");
       //////////////////////////
       if(e.arguments && e.arguments.length){
         let testString = '' + e.arguments[0];
@@ -1376,7 +1378,7 @@ function checkForFlowToSink(e, node_type){
 
     else if(e.object === theDocument && e.callee == "writeln"){
       ///////////gaeun//////////
-      DEBUG &&console.log("[checkForFlowToSink] 5");
+      GAEUNDEBUG && console.log("[checkForFlowToSink] 5");
       //////////////////////////
       if(e.arguments && e.arguments.length){
         let testString = '' + e.arguments[0];
@@ -1389,7 +1391,7 @@ function checkForFlowToSink(e, node_type){
 
     else if(e.callee === "insertAdjacentHTML" && isDOMElement(e.object)){
       ///////////gaeun//////////
-      DEBUG &&console.log("[checkForFlowToSink] 6");
+      GAEUNDEBUG && console.log("[checkForFlowToSink] 6");
       //////////////////////////
       if(e.arguments && e.arguments.length >= 2){
         let testString = '' + e.arguments[1];
@@ -1402,16 +1404,16 @@ function checkForFlowToSink(e, node_type){
 
     else if(e.callee === "setAttribute" && e.object && e.object.tagName && e.object.tagName.toUpperCase() === 'SCRIPT'){
       ///////////gaeun//////////
-      DEBUG &&console.log("[checkForFlowToSink] 7");
+      GAEUNDEBUG && console.log("[checkForFlowToSink] 7");
       //////////////////////////
       if(e.arguments && e.arguments.length >= 2){
         let testString = '' + e.arguments[1];
         ///////////gaeun//////////
-        DEBUG &&console.log("[checkForFlowToSink] testString: "+testString);
+        GAEUNDEBUG && console.log("[checkForFlowToSink] testString: "+testString);
         //////////////////////////
         let flag = checkTaint(testString, e);
         ///////////gaeun//////////
-        DEBUG &&console.log("[checkForFlowToSink] checkTaint: "+flag);
+        GAEUNDEBUG && console.log("[checkForFlowToSink] checkTaint: "+flag);
         //////////////////////////
         if(flag){
           e.call = noOperationFunction;
@@ -1421,7 +1423,7 @@ function checkForFlowToSink(e, node_type){
 
     else if(e.name === 'fetch'){
       ///////////gaeun//////////
-      DEBUG &&console.log("[checkForFlowToSink] 8");
+      GAEUNDEBUG && console.log("[checkForFlowToSink] 8");
       //////////////////////////
       if(e.arguments && e.arguments.length){
         let testString = '' + e.arguments[0];
@@ -1434,7 +1436,7 @@ function checkForFlowToSink(e, node_type){
 
     else if(e.object.toString() === '[object XMLHttpRequest]' && e.callee === "open"){
       ///////////gaeun//////////
-      DEBUG &&console.log("[checkForFlowToSink] 9");
+      GAEUNDEBUG && console.log("[checkForFlowToSink] 9");
       //////////////////////////
       if(e.arguments && e.arguments.length){
         let testString = '' + e.arguments[1];
@@ -1446,7 +1448,7 @@ function checkForFlowToSink(e, node_type){
     }
     else if(isLocationObject(e.object) && (e.callee === "replace" || e.callee === "assign")){
       ///////////gaeun//////////
-      DEBUG &&console.log("[checkForFlowToSink] 10");
+      GAEUNDEBUG && console.log("[checkForFlowToSink] 10");
       //////////////////////////
       if(e.arguments && e.arguments.length){
         let testString = '' + e.arguments[0];
@@ -1458,7 +1460,7 @@ function checkForFlowToSink(e, node_type){
 
     else if(e.object == JSON && e.callee === 'parse'){
       ///////////gaeun//////////
-      DEBUG &&console.log("[checkForFlowToSink] 11");
+      GAEUNDEBUG && console.log("[checkForFlowToSink] 11");
       //////////////////////////
       if(e.arguments && e.arguments.length){
         let testString = '' + e.arguments[0];
@@ -1471,7 +1473,7 @@ function checkForFlowToSink(e, node_type){
 
     else if((e.object == theWindow.localStorage || e.object == theWindow.sessionStorage) && e.callee === 'setItem'){
       ///////////gaeun//////////
-      DEBUG &&console.log("[checkForFlowToSink] 12");
+      GAEUNDEBUG && console.log("[checkForFlowToSink] 12");
       //////////////////////////
       if(e.arguments && e.arguments.length){
         let testString = '' + e.arguments[1];
@@ -1539,13 +1541,13 @@ function checkForFlowToSink(e, node_type){
  */                                                                                                                                                                                                                                                                                                                                                                                     
 function instrumentStage(stage){
   /////////////gaeun/////////////
-  DEBUG && console.log('[instrumentStage]: start');
+  GAEUNDEBUG && console.log('[instrumentStage]: start');
   //////////////////////////////
   let AssignExpressionListener = stage.addListener(Iroh.ASSIGN);
   AssignExpressionListener.on("fire", (e) => {
     checkForFlowToSink(e, "AssignmentExpression");
     /////////////gaeun/////////////
-    DEBUG && console.log('[checkForFlowToSink]: end');
+    GAEUNDEBUG && console.log('[checkForFlowToSink]: end');
     //////////////////////////////
   });
 
@@ -1556,7 +1558,7 @@ function instrumentStage(stage){
   CallExpressionListener.on("before", (e) => { 
     checkForFlowToSink(e, "CallExpression");
     //////////////////////////gaeun////////////////////
-    DEBUG && console.log("[instrumentStage] checkForFlowToSink: done");
+    GAEUNDEBUG && console.log("[instrumentStage] checkForFlowToSink: done");
     ///////////////////////////////////////////////////
     if (isDestructiveCall(e)) {
       // replace destructive operations with no-op to 
@@ -1581,7 +1583,7 @@ function instrumentStage(stage){
 
     if(!shouldDoDefaultExecution){
       ///////////////gaeun/////////////////
-      console.log("[instrumentStage] shouldForceExecute: "+ shouldDoDefaultExecution);
+      GAEUNDEBUG && console.log("[instrumentStage] shouldForceExecute: "+ shouldDoDefaultExecution);
       /////////////////////////////////////
       e.value = shouldForceExecute(e);
       FORCE_EXEC_DEBUG_RUN && console.log("Forcing branch to", e.value);
@@ -1678,7 +1680,7 @@ function getPathThresholdCount(){
  */
 function forceExecuteOtherPaths(){
   //////////////////////gaeun//////////////////
-  console.log("[forceExecuteOtherPaths] currentBranchPath: "+currentBranchPath);
+  GAEUNDEBUG && console.log("[forceExecuteOtherPaths] currentBranchPath: "+currentBranchPath);
   /////////////////////////////////////////////
   // store the last visited path
   if(currentBranchPath && currentBranchPath.length){
@@ -1708,7 +1710,7 @@ function forceExecuteOtherPaths(){
     }
     /////////////gaeun/////////////
     //console.log('[forceExecuteOtherPaths] : '+window.stage.script)
-    console.log('[forceExecuteOtherPaths] currentBranchPath: '+nPathsExecuted +pathsExecuted)
+    GAEUNDEBUG && console.log('[forceExecuteOtherPaths] currentBranchPath: '+nPathsExecuted +pathsExecuted)
     ///////////////////////////////
 
   }
